@@ -1,3 +1,4 @@
+from streamlit_webrtc import webrtc_streamer
 import streamlit as st
 import face_recognition
 import cv2
@@ -128,3 +129,26 @@ if run:
                 st.stop()
 
         FRAME_WINDOW.image(img, channels="BGR")
+
+import cv2
+from streamlit_webrtc import webrtc_streamer
+
+st.write("Start Camera")
+
+def video_frame_callback(frame):
+    img = frame.to_ndarray(format="bgr24")
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    face_cascade = cv2.CascadeClassifier(
+        cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    )
+
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    for (x, y, w, h) in faces:
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0,255,0), 2)
+
+    return img
+
+webrtc_streamer(key="camera", video_frame_callback=video_frame_callback)
